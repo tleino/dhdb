@@ -1,0 +1,38 @@
+dhdb - Multi-format dynamic and hierarchical database for C
+Copyright (c) 2015 Tommi M. Leino <tleino@me.com>
+
+This library provides an in-memory object system that adds
+dynamic, scripting language-like ease to the C programming
+language. The original intention was to use this API for
+adding JSON support to programs, but a modular approach
+made it possible, at the same time, to support importing the
+state from, and exporting to, various standard compliant
+formats in addition to JSON, such as INI. It is easy to add
+new import / export modules by following the existing modules.
+
+If you want to use this library for example for JSON, take
+dhdb.c and dhdb_json.c, and the respective headers, nothing else
+is needed. For INI support, take the dhdb_ini.c, etc.
+
+The Makefile requires GNU make, but you can easily take the
+relevant files and integrate to your build systems.
+
+Design goals:
+* Permissive license
+* Low overhead
+* Modular
+* Portable
+
+Optional features:
+* Path API (dhdb_path)
+* Import and export JSON (dhdb_json)
+* Import and export INI format files (dhdb_ini)
+* Dump object contents with memory usage information (dhdb_dump)
+
+Features that are under implementation:
+* Import and export XML (dhdb_xml)
+
+Features that may be implemented later:
+* Import and export BSON (dhdb_bson)
+* Import and export UBJSON (dhdb_ubjson)
+* Import and export RFC822 headers (dhdb_header)

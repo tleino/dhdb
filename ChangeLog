@@ -1,0 +1,17 @@
+RELEASE
+Version: 0.1.1
+Summary: Changing object values doesn't create duplicate members to objects
+Date: Wed, 30 Sep 2015
+
+* Fixed a situation where changing object value actually created a new object
+  value
+
+RELEASE
+Version: 0.1
+Summary: First release
+Date: Mon, 28 Sep 2015
+
+* First version of core API
+* First version of json importer/exporter
+* First version of ini importer/exporter
+* First version of path API
