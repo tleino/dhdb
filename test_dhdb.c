@@ -1,4 +1,5 @@
 #include "dhdb.h"
+#include "dhdb_dump.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -173,11 +174,129 @@ void test_type_changes()
 void test_empty_array()
 {
 	dhdb_t *s = _test("Test empty array");
-	dhdb_add_num(s, 34);
-	dhdb_add_num(s, 21.1);
+	dhdb_set_str(s, "Hello");
 	dhdb_set_array(s);
 	assert(dhdb_len(s) == 0);
 	assert(dhdb_type(s) == DHDB_VALUE_ARRAY);
+	dhdb_free(s);
+}
+
+void test_index()
+{
+	dhdb_t *s = _test("Test index");
+	dhdb_add_num(s, 34);
+	dhdb_add_num(s, 21.1);
+	assert(dhdb_len(s) == 2);
+	assert(dhdb_index(dhdb_at(s, 0)) == 0);
+	assert(dhdb_index(dhdb_at(s, 1)) == 1);
+	dhdb_free(s);
+}
+
+void test_remove_items()
+{
+	dhdb_t *s = _test("Test remove items from array");
+	dhdb_add_str(s, "hello");
+	dhdb_add_str(s, "middle");
+	dhdb_add_str(s, "world");
+	dhdb_free(dhdb_at(s, 1));
+
+	assert(dhdb_len(s) == 2);
+	assert(!strcmp(dhdb_str_at(s, 0), "hello"));
+	assert(!strcmp(dhdb_str_at(s, 1), "world"));
+
+	dhdb_free(dhdb_at(s, 0));
+	dhdb_free(dhdb_at(s, 0));
+	assert(dhdb_len(s) == 0);
+
+	dhdb_free(s);
+}
+
+void test_insert()
+{
+	dhdb_t *s = _test("Test insert to array");
+	dhdb_add_str(s, "hello");
+	dhdb_add_str(s, "world");
+
+	dhdb_t *n = dhdb_create();
+	dhdb_set_str(n, "middle");
+	dhdb_insert(s, dhdb_at(s, 0), n);
+
+	assert(dhdb_len(s) == 3);
+	assert(!strcmp(dhdb_str_at(s, 0), "hello"));
+	assert(!strcmp(dhdb_str_at(s, 1), "middle"));
+	assert(!strcmp(dhdb_str_at(s, 2), "world"));
+
+	dhdb_t *l = dhdb_create();
+	dhdb_set_str(l, "last");
+	dhdb_insert(s, dhdb_at(s, 2), l);
+
+	assert(dhdb_len(s) == 4);
+	assert(!strcmp(dhdb_str_at(s, 0), "hello"));
+	assert(!strcmp(dhdb_str_at(s, 1), "middle"));
+	assert(!strcmp(dhdb_str_at(s, 2), "world"));
+	assert(!strcmp(dhdb_str_at(s, 3), "last"));
+
+	dhdb_free(s);
+}
+
+void test_detach()
+{
+	dhdb_t *s = _test("Test detaching element");
+	dhdb_t *to_detach = dhdb_create();
+	dhdb_set_obj_num(to_detach, "hello", 1);
+	dhdb_set_obj_num(to_detach, "world", 2);
+
+	dhdb_set_obj(s, "to_detach", to_detach);
+	printf("s is\n");
+	dhdb_dump(s);
+	printf("to_detach is:");
+	dhdb_dump(to_detach);
+	dhdb_t *detached = dhdb_detach(to_detach);
+	printf("as detached");
+	dhdb_dump(detached);
+	dhdb_free(detached);
+
+	dhdb_free(s);
+}
+
+void test_value_ops()
+{
+	dhdb_t *s = _test("Value ops");
+	dhdb_t *num = dhdb_create_num(3.0);
+	dhdb_add(s, num);
+	assert(dhdb_num(num) == 3.0);
+	dhdb_set_num(num, 4.0);
+	assert(dhdb_num(num) == 4.0);
+	dhdb_set_num_inc(num);
+	assert(dhdb_num(num) == 5.0);
+	dhdb_set_num_dec(num);
+	assert(dhdb_num(num) == 4.0);
+	dhdb_set_num_div(num, 2);
+	assert(dhdb_num(num) == 2.0);
+	dhdb_set_num_mul(num, 2);
+	assert(dhdb_num(num) == 4.0);
+	dhdb_set_num_sub(num, 2);
+	assert(dhdb_num(num) == 2.0);
+
+	dhdb_t *str = dhdb_create_str_va("Hello %s", "world");
+	dhdb_add(s, str);
+	assert(!strcmp(dhdb_str(str), "Hello world"));
+	dhdb_set_str_va(str, "Hello %s", "again");
+	assert(!strcmp(dhdb_str(str), "Hello again"));
+	dhdb_set_str_add_va(str, "%d More", 1);
+	assert(!strcmp(dhdb_str(str), "Hello again1 More"));
+
+	dhdb_set_str(str, "3");
+	dhdb_set_num_from(str, str);
+	assert(dhdb_type(str) == DHDB_VALUE_NUMBER);
+	assert(dhdb_num(str) == 3.0);
+	dhdb_set_bool_from(str, str);
+	assert(dhdb_type(str) == DHDB_VALUE_BOOL);
+	assert(dhdb_bool(str) == true);
+	dhdb_set_str_from(str, str);
+	assert(dhdb_type(str) == DHDB_VALUE_STRING);
+	assert(!strcmp(dhdb_str(str), "true"));
+
 	dhdb_free(s);
 }
 
@@ -195,6 +314,11 @@ int main(int argc, char **argv)
 	test_array_within_object();
 	test_type_changes();
 	test_empty_array();
+	test_index();
+	test_remove_items();
+	test_insert();
+	test_detach();
+	test_value_ops();
 	
 	return 0;
 }

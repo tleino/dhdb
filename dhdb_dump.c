@@ -44,11 +44,13 @@ _dump(dhdb_t *s, int level, int index)
 	};
 
 	bytes = sizeof(dhdb_t);
-	if (s->name) bytes += strlen(s->name) + 1;
-	if (s->str) bytes += strlen(s->str) + 1;
+	if (s->name)
+		bytes += strlen(s->name) + 1;
+	if (s->str)
+		bytes += strlen(s->str) + 1;
 
 	for (int i = 0; i < level; i++)
-		printf("\t");
+		putchar('\t');
 
 	if (index)
 		printf("%2d ", index);
@@ -59,7 +61,7 @@ _dump(dhdb_t *s, int level, int index)
 
 	if (s->name)
 		printf("%s ", s->name);
-	
+
 	if (s->type == DHDB_VALUE_NUMBER)
 		printf("%lf ", s->num);
 	else if (s->type == DHDB_VALUE_STRING)
@@ -70,12 +72,9 @@ _dump(dhdb_t *s, int level, int index)
 		printf("null ");
 
 	if (s->type == DHDB_VALUE_ARRAY || s->type == DHDB_VALUE_OBJECT)
-		printf("[len=%d] [address=%lx] ", s->array_len, (uintptr_t) s);
+		printf("[len=%d] ", s->array_len);
 
-	if (s->parent)
-		printf("[parent=%lx] ", (uintptr_t) s->parent);
-
-	printf("\n");
+	putchar('\n');
 
 	n = s->first_child;
 	i = 0;

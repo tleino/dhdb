@@ -27,6 +27,8 @@ struct dhdbValue
 	int array_len;
 	char *name;
 
+	uint32_t index;
+
 	struct dhdbValue *first_child;
 	struct dhdbValue *last_child;
 	struct dhdbValue *next;

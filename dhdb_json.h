@@ -23,6 +23,7 @@
 // RFC 7159
 
 dhdb_t*		dhdb_create_from_json(const char *str);
+dhdb_t*		dhdb_create_from_json_file(const char *fmt, ...);
 const char*	dhdb_to_json(dhdb_t *s);
 const char*	dhdb_to_json_pretty(dhdb_t *s);
 

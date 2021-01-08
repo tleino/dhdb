@@ -20,7 +20,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __USE_BSD
 #define __USE_BSD
+#endif
 #include <string.h>
 
 static void _parse_section(dhdb_t *, const char *, dhdb_t **);
@@ -31,16 +33,20 @@ static const char* _serialize(dhdb_t *, char *, int);
 dhdb_t*
 dhdb_create_from_ini(const char *str)
 {
-	dhdb_t *s, *current_section = 0;
-	int i, begin = 0;
+	dhdb_t *s, *current_section;
 	char *line;
+	int i, begin;
 
 	s = dhdb_create();
+	current_section = 0;
 
+	begin = 0;
 	for (i = 0; i < strlen(str); i++) {
 		if (str[i] == '\n') {
 			line = strdup(&str[begin]);
 			line[i - begin] = 0;
+			if ( line[i-begin-1] == '\r' )
+				line[i-begin-1] = 0;
 			_parse_line(s, line, &current_section);
 			free(line);
 			begin = i + 1;
@@ -58,7 +64,7 @@ dhdb_to_ini(dhdb_t *s)
 	assert(s);
 	out[0] = 0;
 	_serialize(s, out, 0);
-	return out;	
+	return out;
 }
 
 static void
@@ -69,9 +75,8 @@ _parse_section(dhdb_t *s, const char *line, dhdb_t **current_section)
 	section = strdup(&line[1]);
 	section[strlen(section)-1] = 0;
 
-	if (dhdb_by(s, section) == NULL) {
+	if (dhdb_by(s, section) == NULL)
 		dhdb_set_obj(s, section, dhdb_create());
-	}
 	*current_section = dhdb_by(s, section);
 	free(section);
 }
@@ -80,7 +85,7 @@ static void
 _parse_line(dhdb_t *s, const char *line, dhdb_t **current_section)
 {
 	int i;
-	char *p, *field, *value;
+	char *p, *field, *value, *value_tmp;
 
 	if (line[0] == '[')
 		return _parse_section(s, line, current_section);
@@ -88,18 +93,22 @@ _parse_line(dhdb_t *s, const char *line, dhdb_t **current_section)
 		return;
 
 	p = strchr(line, '=');
-	if (!p)
-		return;
+	if (!p) return;
 
 	field = strdup(line);
 	field[p - line] = 0;
 	value = strdup(&line[p - line + 1]);
-	
+	if ( value[0] == '"' && value[strlen(value)-1] == '"' ) {
+		value[strlen(value)-1] = 0;
+		value_tmp = strdup(&value[1]);
+		free(value);
+		value = strdup(value_tmp);
+		free(value_tmp);
+	}
 	if (*current_section)
 		dhdb_set_obj_str(*current_section, field, value);
 	else
 		dhdb_set_obj_str(s, field, value);
-
 	free(field);
 	free(value);
 }
@@ -115,7 +124,7 @@ _print_value(dhdb_t *s, char *out)
 			snprintf(val, sizeof(val), "%ld",
 			    (long int) dhdb_num(s));
 		else
-			snprintf(val, sizeof(val), "%lf", dhdb_num(s));
+			snprintf(val, sizeof(val), "%.8f", dhdb_num(s));
 	}
 	else if (dhdb_type(s) == DHDB_VALUE_STRING)
 		snprintf(val, sizeof(val), "%s", dhdb_str(s));
@@ -133,9 +142,9 @@ _serialize(dhdb_t *s, char *out, int level)
 {
 	char val[8192];
 	const char *name;
-	val[0] = 0;
 	dhdb_t *n;
 
+	val[0] = 0;
 	name = dhdb_name(s);
 
 	if (level == 1 && name && dhdb_type(s) == DHDB_VALUE_OBJECT) {

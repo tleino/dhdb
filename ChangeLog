@@ -1,4 +1,47 @@
 RELEASE
+Version: 0.2.0
+Summary: Path improvements, dynamic strings, API helpers
+Date: Sun, 18 Oct 2015
+
+* Added various dhdb_set and dhdb_create helpers, including dynamic strings
+* Path operations can now create new object paths
+* Path operations can now flatten hierarchies
+* Path operations can now query all leaves based on a pattern
+
+RELEASE
+Version: 0.1.6
+Summary: More flexible arrays, optimized JSON parser
+Date: Fri, 16 Oct 2015
+
+* Added dhdb_index
+* Added dhdb_insert
+* Added dhdb_detach
+* Added support for removing an element from arrays
+* Optimized JSON parser performance
+
+RELEASE
+Version: 0.1.4
+Summary: More dynamic core dhdb
+Date: Mon, 12 Oct 2015
+
+* Changing types dynamically is possible
+
+RELEASE
+Version: 0.1.3
+Summary: Error handling upgrades, json file import
+Date: Mon, 12 Oct 2015
+
+* Error handling upgrades with error messages to stderr
+* Helper to import json from files
+
+RELEASE
+Version: 0.1.2
+Summary: Case insensitive field names
+Date: Fri, 9 Oct 2015
+
+* Case insensitive field names
+
+RELEASE
 Version: 0.1.1
 Summary: Changing object values doesn't create duplicate members to objects
 Date: Wed, 30 Sep 2015

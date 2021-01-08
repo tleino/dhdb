@@ -1,8 +1,8 @@
-BUILD_DIR ?= /tmp
-CFLAGS ?= -std=c99 -Werror -g
+BUILD_DIR ?= /tmp/test
+CFLAGS += $(DEBUG_CFLAGS) -std=c99 -Wformat -Werror -O3 -D_GNU_SOURCE
 SRC_DIR := $(shell pwd)
 BUILD_PROGRAMS := $(patsubst %,$(BUILD_DIR)/%,$(PROGRAMS))
-#VALGRIND ?= valgrind -q --leak-check=full
+VALGRIND ?= valgrind -q --leak-check=full
 
 .PHONY: all
 all: $(BUILD_PROGRAMS)
@@ -18,17 +18,15 @@ endef
 
 $(BUILD_PROGRAMS):
 	@echo $@
-	@gcc $^ -o $@
-ifeq (,$(findstring $(notdir $@),$(VALGRIND_AUTORUN)))
-	$(VALGRIND) $@
-endif
+	$(CC) $^ -o $@
+	$(if $(findstring $(notdir $@),$(VALGRIND_AUTORUN)),$(VALGRIND) $@)
 
 -include $(wildcard $(BUILD_DIR)/*.d)
 
 $(BUILD_DIR)/%.o: %.c
 	@echo $@
-	@$(CC) -c $(CFLAGS) $*.c -o $@ #$*.o
-	@$(CC) -MM -MT $@ $(CFLAGS) $*.c > $(BUILD_DIR)/$*.d
+	$(CC) -c $(CFLAGS) $*.c -o $@ #$*.o
+	$(CC) -MM -MT $@ $(CFLAGS) $*.c > $(BUILD_DIR)/$*.d
 
 clean:
 	rm -f $(ALL_OBJS) $(ALL_OBJS:.o=.d) $(BUILD_PROGRAMS)

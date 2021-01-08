@@ -1,4 +1,5 @@
 #include "dhdb_json.h"
+#include "dhdb_dump.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -137,6 +138,31 @@ static void _test_parse(bool want_export_import)
 	assert(dhdb_num_at(dhdb_by(s, "f1"), 2) == 3);
 	assert(dhdb_num_by(s, "f2") == 3);
 	assert(dhdb_num_by(s, "f3") == -3.5);
+	dhdb_free(s);
+
+	// Error
+	s = _test("Error handling 1", "{ \"f1\" : [ af, foop ] }", false);
+	assert(s == NULL);
+
+	s = _test("Error handling 2", "{ \"f1\" : [ 1.5, 1.a, 1 ] }", false);
+	assert(s == NULL);
+
+	s = _test("Error handling 3", "{ \"f1\" : [ 1, 2 }", false);
+	assert(s == NULL);
+
+	s = _test("Error handling 4", "{ \"f1 : [ 1, 2 ]", false);
+	assert(s == NULL);
+
+	s = _test("Error handling 5", "{ f1 : [ 1, 2 ] }", false);
+	assert(s == NULL);
+
+	s = _test("Error handling 6", "{ \"f1\" : { 1, 2 ] }", false);
+	assert(s == NULL);
+
+	// Test file
+	s = dhdb_create_from_json_file("test.json");
+	dhdb_dump(s);
+	assert(s);
 	dhdb_free(s);
 }
 
